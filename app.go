@@ -66,6 +66,13 @@ func runUpdate(args *docopt.Args) error {
 
 func runDeploy(args *docopt.Args) error {
 	var svn = args.String["--svn-url"]
-	log.Printf("Deployed %s", svn)
+	log.Printf("Exporting %s...", svn)
+	var cmd = "docker run -it -v /tmp:/tmp -a stdout tegdsf/centos svn export " + svn + " /tmp/slug"
+	log.Println(cmd)
+	cmd = "tar cvf slug.tar --directory=/tmp/slug ."
+	cmd = "cat slug.tar | docker run -i -v /tmp/buildpacks:/tmp/buildpacks -e HTTP_SERVER_URL=http://192.168.59.103:8080 -a stdin flynn/slugbuilder - > /tmp/slug.tgz"
+	log.Println("Compiling code...")
+
+	log.Printf("Created release for app %s", os.Getenv("JFLYNN_APP"))
 	return nil
 }
