@@ -68,7 +68,7 @@ func runDeploy(args *docopt.Args) error {
 		}
 	}
 	{
-		cmd = "tar cvf " + tempDir + ".tar --directory=/tmp" + appName + " ."
+		cmd = "tar cvf " + tempDir + ".tar --directory=/tmp/" + appName + " ."
 		log.Println("Executing " + cmd)
 		_, err := execCmd(cmd)
 		if err != nil {
