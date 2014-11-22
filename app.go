@@ -56,17 +56,33 @@ func runDeploy(args *docopt.Args) error {
 	log.Printf("Exporting %s...", svn)
 
 	var cmd = "docker run -it centos echo haha"
-	out, err := execCmd(cmd)
-	if err != nil {
-		fmt.Printf("%s", err)
-	}
-	fmt.Printf("%s", out)
+	tempDir := " /tmp/" + appName
 
-	cmd = "docker run -it -v /tmp:/tmp -a stdout tegdsf/centos svn export " + svn + " /tmp/" + appName
-	log.Println(cmd)
-	cmd = "tar cvf /tmp/" + appName + ".tar --directory=/tmp/" + appName + " ."
-	cmd = "cat slug.tar | docker run -i -v /tmp/buildpacks:/tmp/buildpacks -e HTTP_SERVER_URL=http://192.168.59.103:8080 -a stdin flynn/slugbuilder - > /tmp/slug.tgz"
-	log.Println("Compiling code...")
+	{
+
+		cmd = "docker run -it -v /tmp:/tmp tegdsf/centos svn export " + svn + tempDir
+		log.Println("Executing " + cmd)
+		_, err := execCmd(cmd)
+		if err != nil {
+			fmt.Printf("%s", err)
+		}
+	}
+	{
+		cmd = "tar cvf " + tempDir + ".tar --directory=" + tempDir + " ."
+		log.Println("Executing " + cmd)
+		_, err := execCmd(cmd)
+		if err != nil {
+			fmt.Printf("%s", err)
+		}
+	}
+	{
+		cmd = "cat " + tempDir + ".tar| docker run -i -v /tmp/buildpacks:/tmp/buildpacks -e HTTP_SERVER_URL=http://192.168.59.103:8080 -a stdin flynn/slugbuilder - > /tmp/slug.tgz"
+		log.Println("Executing " + cmd)
+		_, err := execCmd(cmd)
+		if err != nil {
+			fmt.Printf("%s", err)
+		}
+	}
 
 	log.Printf("Created release for app %s", appName)
 	return nil
