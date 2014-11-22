@@ -53,9 +53,13 @@ func runDeploy(args *docopt.Args) error {
 	var appName = args.String["-a"]
 	var svn = args.String["--svn-url"]
 	log.Printf("Exporting %s...", svn)
-	d, _ := exec.Command("docker", "run", "-it", "centos", "echo haha").Output()
-	fmt.Println(string(d))
-	var cmd = "docker run -it -v /tmp:/tmp -a stdout tegdsf/centos svn export " + svn + " /tmp/" + appName
+	var cmd = "docker run -it centos echo haha"
+	out, err := exec.Command("sh", "-c", cmd).Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(out))
+	cmd = "docker run -it -v /tmp:/tmp -a stdout tegdsf/centos svn export " + svn + " /tmp/" + appName
 	log.Println(cmd)
 	cmd = "tar cvf /tmp/" + appName + ".tar --directory=/tmp/" + appName + " ."
 	cmd = "cat slug.tar | docker run -i -v /tmp/buildpacks:/tmp/buildpacks -e HTTP_SERVER_URL=http://192.168.59.103:8080 -a stdin flynn/slugbuilder - > /tmp/slug.tgz"
