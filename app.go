@@ -56,10 +56,7 @@ func runDeploy(args *docopt.Args) error {
 	log.Printf("Exporting %s...", svn)
 
 	var cmd = "docker run -it centos echo haha"
-	parts := strings.Fields(cmd)
-	head := parts[0]
-	parts = parts[1:len(parts)]
-	out, err := exec.Command(head, parts...).Output()
+	out, err := execCmd(cmd)
 	if err != nil {
 		fmt.Printf("%s", err)
 	}
@@ -73,4 +70,11 @@ func runDeploy(args *docopt.Args) error {
 
 	log.Printf("Created release for app %s", appName)
 	return nil
+}
+
+func execCmd(cmd string) ([]byte, error) {
+	parts := strings.Fields(cmd)
+	head := parts[0]
+	parts = parts[1:len(parts)]
+	return exec.Command(head, parts...).Output()
 }
