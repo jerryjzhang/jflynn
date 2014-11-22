@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/flynn/flynn/Godeps/_workspace/src/github.com/flynn/go-docopt"
 )
@@ -53,12 +54,17 @@ func runDeploy(args *docopt.Args) error {
 	var appName = args.String["-a"]
 	var svn = args.String["--svn-url"]
 	log.Printf("Exporting %s...", svn)
+
 	var cmd = "docker run -it centos echo haha"
-	out, err := exec.Command("sh", "-c", cmd).Output()
+	parts := strings.Fields(cmd)
+	head := parts[0]
+	parts = parts[1:len(parts)]
+	out, err := exec.Command(head, parts...).Output()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Printf("%s", err)
 	}
-	fmt.Println(string(out))
+	fmt.Printf("%s", out)
+
 	cmd = "docker run -it -v /tmp:/tmp -a stdout tegdsf/centos svn export " + svn + " /tmp/" + appName
 	log.Println(cmd)
 	cmd = "tar cvf /tmp/" + appName + ".tar --directory=/tmp/" + appName + " ."
