@@ -68,7 +68,7 @@ func runDeploy(args *docopt.Args) error {
 		}
 	}
 	{
-		cmd = "tar cvf " + tempDir + ".tar --directory=" + tempDir + " ."
+		cmd = "tar cvf " + tempDir + ".tar --directory=/tmp" + appName + " ."
 		log.Println("Executing " + cmd)
 		_, err := execCmd(cmd)
 		if err != nil {
@@ -77,6 +77,14 @@ func runDeploy(args *docopt.Args) error {
 	}
 	{
 		cmd = "cat " + tempDir + ".tar| docker run -i -v /tmp/buildpacks:/tmp/buildpacks -e HTTP_SERVER_URL=http://192.168.59.103:8080 -a stdin flynn/slugbuilder - > /tmp/slug.tgz"
+		log.Println("Executing " + cmd)
+		_, err := execCmd(cmd)
+		if err != nil {
+			fmt.Printf("%s", err)
+		}
+	}
+	{
+		cmd = "cat /tmp/slug.tgz | docker run -i -p 19800:19800 -e PORT=19800 -a stdin -a stdout -a stderr flynn/slugrunner start web "
 		log.Println("Executing " + cmd)
 		_, err := execCmd(cmd)
 		if err != nil {
